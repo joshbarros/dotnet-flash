@@ -1,0 +1,11 @@
+node_modules
+dist
+.nx
+.git
+**/bin
+**/obj
+.env
+.angular
+test-results
+playwright-report
+TestResults

@@ -1,0 +1,80 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: flash_test
+          POSTGRES_USER: flash
+          POSTGRES_PASSWORD: flash
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U flash"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FLASH_TEST_DB: "Host=localhost;Port=5432;Database=flash_test;Username=flash;Password=flash"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: npm ci
+      - run: dotnet restore Flash.sln
+      - run: npm run format:check
+      - name: Unit tests (no Docker)
+        run: dotnet test tests/Flash.UnitTests --no-restore --collect:"XPlat Code Coverage" --results-directory coverage
+      - name: Integration tests (real Postgres, real auth pipeline)
+        run: dotnet test tests/Flash.IntegrationTests --no-restore --collect:"XPlat Code Coverage" --results-directory coverage
+      - name: No known-vulnerable packages
+        run: |
+          dotnet list Flash.sln package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt
+          ! grep -q "has the following vulnerable packages" vulnerable.txt
+      - run: npm audit --omit=dev --audit-level=high
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: ignore
+      - run: npx nx run-many -t typecheck lint -p web
+      - run: npx nx run-many -t build -p web api
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build and start the Compose stack
+        run: docker compose up --build --wait --wait-timeout 420
+      - name: Smoke
+        run: ./scripts/smoke.sh
+      - name: Browser specs
+        run: npx playwright test
+      - name: Compose logs
+        if: failure()
+        run: docker compose logs --no-color --tail=300
+      - name: Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          if-no-files-found: ignore
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v

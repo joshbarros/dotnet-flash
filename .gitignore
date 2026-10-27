@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.nx/
+**/bin/
+**/obj/
+.env
+.env.*
+!.env.example
+TestResults/
+.angular/
+test-results/
+playwright-report/
+*.user
+.DS_Store

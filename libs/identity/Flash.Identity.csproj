@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <ProjectReference Include="../shared/Flash.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Flash.UnitTests" />
+    <InternalsVisibleTo Include="Flash.IntegrationTests" />
+  </ItemGroup>
+</Project>
