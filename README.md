@@ -309,6 +309,7 @@ Nx 23.2.1 orchestrates `nx build web` and `nx build api`; Each module's EF Core 
 
 ## Other systems in this .NET track
 
+- [golang-flash](https://github.com/joshbarros/golang-flash): this system in Go on Kubernetes, with the same API and UI.
 - [dotnet-freight](https://github.com/joshbarros/dotnet-freight): container space on ocean sailings.
 - [dotnet-clinic](https://github.com/joshbarros/dotnet-clinic): appointment slots in a provider session.
 - [dotnet-ledger](https://github.com/joshbarros/dotnet-ledger): outgoing payments from an account balance.
